@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import Link from 'next/link' // <--- 1. Importado
+import Link from 'next/link'
 
 export default function Catalogo() {
   const [naves, setNaves] = useState<any[]>([])
@@ -16,20 +16,23 @@ export default function Catalogo() {
     fetchNaves()
   }, [])
 
-  if (loading) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white font-black animate-pulse">CARGANDO VANTAGE...</div>
+  if (loading) return <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white font-black animate-pulse uppercase tracking-widest italic">Cargando Portfolio...</div>
 
   return (
     <main className="p-8 bg-slate-900 min-h-screen text-white font-sans">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-16 border-b border-slate-800 pb-10">
-          <h1 className="text-6xl font-black mb-2 tracking-tighter italic">VANTAGE <span className="text-indigo-500">PORTFOLIO</span></h1>
-          <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-xs">Barcelona Industrial Spaces</p>
+        <header className="mb-16 border-b border-slate-800 pb-10 flex justify-between items-end">
+          <div>
+            <h1 className="text-6xl font-black mb-2 tracking-tighter italic leading-none">VANTAGE <span className="text-indigo-500">PORTFOLIO</span></h1>
+            <p className="text-slate-500 font-bold uppercase tracking-[0.3em] text-xs">Barcelona Industrial Spaces</p>
+          </div>
+          <Link href="/" className="bg-white text-black text-[10px] font-black px-6 py-3 rounded-full uppercase tracking-widest hover:bg-indigo-500 hover:text-white transition-all shadow-xl mb-2">
+            + Captar Nave
+          </Link>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {naves.map((nave) => (
-            
-            // 2. ENVOLVEMOS CADA NAVE CON EL ENLACE DINÁMICO
             <Link key={nave.id} href={`/catalogo/${nave.id}`}>
               <div className="bg-slate-800 rounded-[2.5rem] overflow-hidden border border-slate-700 hover:border-indigo-500 transition-all duration-500 shadow-2xl group cursor-pointer">
                 
@@ -45,7 +48,7 @@ export default function Catalogo() {
                   )}
                 </div>
 
-                <div className="p-8 text-white">
+                <div className="p-8">
                   <h2 className="text-2xl font-black mb-6 uppercase tracking-tight truncate">{nave.direccion}</h2>
                   
                   <div className="grid grid-cols-2 gap-4 mb-8">
@@ -60,12 +63,11 @@ export default function Catalogo() {
                   </div>
 
                   <button className="w-full bg-white text-black font-black py-5 rounded-2xl hover:bg-indigo-500 hover:text-white transition-all transform active:scale-95 uppercase tracking-tighter">
-                    Ver Detalles Técnicos
+                    Ver Reportaje Completo
                   </button>
                 </div>
               </div>
-            </Link> // Cerramos el enlace aquí
-
+            </Link>
           ))}
         </div>
       </div>
