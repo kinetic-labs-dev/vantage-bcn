@@ -10,38 +10,46 @@ export default function Home() {
     setLoading(true)
 
     const formData = new FormData(event.target)
+    
+    // 1. Obtenemos la foto del formulario
     const fotoFile = (formData.get('foto') as File)
     let fotoUrl = null
 
-    // 1. Subir la foto si existe
+    // 2. Si el socio ha subido una foto, la enviamos al Bucket que acabas de crear
     if (fotoFile && fotoFile.size > 0) {
+      // Creamos un nombre único para la imagen (con la fecha actual)
       const fileName = `${Date.now()}-${fotoFile.name}`
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('fotos-naves')
+        .from('fotos-naves') // <--- AQUÍ USAMOS TU BUCKET
         .upload(fileName, fotoFile)
 
       if (uploadError) {
         alert('Error subiendo foto: ' + uploadError.message)
+        setLoading(false)
+        return // Paramos si hay error
       } else {
+        // Si sube bien, pedimos la URL pública para guardarla en la base de datos
         const { data: publicUrlData } = supabase.storage
           .from('fotos-naves')
           .getPublicUrl(fileName)
+        
         fotoUrl = publicUrlData.publicUrl
       }
     }
 
-    // 2. Insertar en la tabla 'espacios' (incluyendo la foto)
+    // 3. Insertamos todos los datos en la tabla 'espacios' (incluyendo la URL de la foto)
     const { error } = await supabase.from('espacios').insert([{
       nombre_dueño: formData.get('dueño'),
       direccion: formData.get('direccion'),
       telefono: formData.get('tel'),
-      imagen_url: fotoUrl // Asegúrate de crear esta columna en Supabase
+      imagen_url: fotoUrl // <--- ¡Importante! Asegúrate de que esta columna exista en Supabase
     }])
 
     if (error) {
-      alert('Error: ' + error.message)
+      alert('Error en base de datos: ' + error.message)
     } else {
-      alert('¡Nave y foto registradas con éxito!')
+      alert('¡Nave y foto registradas con éxito! Buen trabajo.')
       event.target.reset()
     }
     setLoading(false)
@@ -66,10 +74,18 @@ export default function Home() {
             <label className="block text-sm font-bold text-slate-700 mb-1">📱 Teléfono / WhatsApp</label>
             <input name="tel" required placeholder="600 000 000" className="w-full p-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 outline-none text-black" />
           </div>
+
+          {/* ESTE ES EL NUEVO CAMPO DE FOTO 👇 */}
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">📸 Foto de la fachada</label>
-            <input name="foto" type="file" accept="image/*" className="w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+            <label className="block text-sm font-bold text-slate-700 mb-1">📸 Foto de la fachada (con el móvil)</label>
+            <input 
+              name="foto" 
+              type="file" 
+              accept="image/*" 
+              className="w-full text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" 
+            />
           </div>
+          
           <button disabled={loading} type="submit" className="w-full bg-indigo-600 text-white p-4 rounded-xl font-black text-lg hover:bg-indigo-700 shadow-lg active:scale-95 disabled:bg-slate-300">
             {loading ? 'SUBIENDO...' : 'REGISTRAR NAVE 🚀'}
           </button>
